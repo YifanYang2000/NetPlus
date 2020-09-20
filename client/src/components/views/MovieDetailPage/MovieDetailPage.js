@@ -1,12 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {API_URL, API_KEY, IMAGE_URL} from '../../Config';
 import MainImage from '../LandingPage/Sections/MainImage';
-import {Descriptions, Button} from 'antd';
+import {Descriptions, Button, Row} from 'antd';
+import GridCard from '../LandingPage/Sections/GridCard';
 
 function MovieDetailPage(props) {
 
     const movieID = props.match.params.movieID;
     const [Movie, setMovie] = useState([]);
+    const [Crew, setCrew] = useState([]);
+    const [Actor, setActor] = useState(false);
+
+    const handleClick = () => {
+        setActor(!Actor);
+    };
 
     useEffect(() => {
         fetch(`${API_URL}movie/${movieID}?api_key=${API_KEY}&language=en-US`)
@@ -14,6 +21,13 @@ function MovieDetailPage(props) {
             .then(response => {
                 console.log(response)
                 setMovie(response)
+
+                fetch(`${API_URL}movie/${movieID}/credits?api_key=${API_KEY}`)
+                .then(response => response.json())
+                .then(response => {
+                    console.log(response)
+                    setCrew(response.cast)
+                })
             })
     }, []);
 
@@ -26,13 +40,15 @@ function MovieDetailPage(props) {
                 text={Movie.overview} /> 
             }
 
-            {/* Information */}
+            {/* Information Section*/}
             <div style={{width:'85%', margin:'1rem auto'}}>
 
+                {/* Favourite button */}
                 <div style={{display:'flex', justifyContent:'flex-end'}}>
                     <Button>Add to favourite</Button>
                 </div>
 
+                {/* Information table*/}
                 <Descriptions title="Movie Info" bordered>
                     <Descriptions.Item label="Title">{Movie.original_title}</Descriptions.Item>
                     <Descriptions.Item label="Release Date">{Movie.release_date}</Descriptions.Item>
@@ -46,9 +62,27 @@ function MovieDetailPage(props) {
 
                 <br/><br/><br/><br/>
 
+                {/* Toggle Actors button */}
                 <div style={{display:'flex', justifyContent:'center'}}>
-                    <Button>Toggle Actors</Button>
+                    <Button onClick={handleClick}>Toggle Actors</Button>
                 </div>
+
+                <br/><br/>
+
+                {/* Grid cards for actors */}
+                {Actor && 
+                    <Row gutter={[16, 16]}>
+                        {Crew && Crew.map((crew, index) => (
+                            <React.Fragment key={index}>
+                                {crew.profile_path &&
+                                    <GridCard
+                                        actor image = {`${IMAGE_URL}w500${crew.profile_path}`}
+                                    />
+                                }
+                            </React.Fragment>
+                        ))};
+                    </Row>
+                }
 
             </div>
             
