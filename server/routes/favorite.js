@@ -50,7 +50,7 @@ router.post("/addToFavorite", auth, (req, res) => {
 
     favorite.save((err, doc) => {
         if (err) return res.status(400).json({success: false, err});
-        return res.status(200).json({success: true})
+        return res.status(200).json({success: true});
     })
     
 });
@@ -63,9 +63,21 @@ router.post("/removeFromFavorite", auth, (req, res) => {
 
     Favorite.findOneAndDelete({movieId: req.body.movieId, userFrom: req.body.userFrom})
         .exec((err, doc) => {
-            if (err) return res.status(400).json({success: false, err})
-            res.status(200).json({success: true, doc})
+            if (err) return res.status(400).json({success: false, err});
+            res.status(200).json({success: true, doc});
         })
 });
+
+router.post("/getFavoriteMovie", auth, (req, res) => {
+
+    // Get user favorite movies
+
+    Favorite.find({'userFrom': req.body.userFrom})
+        .exec((err, favorites) => {
+            if (err) return res.status(400).json({success: false, err});
+            res.status(200).json({success: true, favorites});
+        })
+});
+
 
 module.exports = router;
